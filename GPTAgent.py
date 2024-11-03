@@ -42,7 +42,7 @@ class GPTAgent:
         self.assistant = self.client.beta.assistants.create(
                         name="Research Assistant",
                         instructions="You are an expert research assistant. Use your knowledge base to answer questions about research papers.",
-                        model="gpt-3.5-turbo",
+                        model="gpt-4o-mini",
                         tools=[{"type": "file_search"}],
                       )
         self.isConfigUpdated = True
@@ -80,22 +80,17 @@ class GPTAgent:
       with open("config.json", "w") as outfile:
         outfile.write(json.dumps(new_assistant_config, indent=4))
        
-    def askAgent(self, prompts):
+    def askAgent(self, prompt):
       # use the assistant to answer queries based on prompts provided
-      if not prompts:
+      if not prompt:
         print('Please provide valid query and try again')
         return
       
-      message_content = []
-      for prompt in prompts:
-          message_content.append(
-            {
+      thread = self.client.beta.threads.create(
+        messages=[{
               "role": "user",
               "content": prompt
-            }
-          )
-      thread = self.client.beta.threads.create(
-        messages=message_content,
+            }],
         tool_resources={
           "file_search": {
               "vector_store_ids": [self.vector_store.id]
